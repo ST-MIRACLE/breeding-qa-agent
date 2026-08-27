@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>番茄育种知识库问答系统</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: #0f1117; color: #e0e0e0; height: 100vh; display: flex; flex-direction: column; }
+
+        .header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 16px 24px; border-bottom: 1px solid #2a2a3e; display: flex; align-items: center; gap: 12px; }
+        .header .logo { width: 40px; height: 40px; background: linear-gradient(135deg, #e63946 0%, #f77f00 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+        .header h1 { font-size: 18px; font-weight: 600; color: #fff; }
+        .header .subtitle { font-size: 12px; color: #6c7293; margin-top: 2px; }
+        .header .status { margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 12px; color: #4ade80; }
+        .header .status .dot { width: 8px; height: 8px; background: #4ade80; border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        .chat-container { flex: 1; overflow-y: auto; padding: 24px; max-width: 900px; width: 100%; margin: 0 auto; }
+        .chat-container::-webkit-scrollbar { width: 6px; }
+        .chat-container::-webkit-scrollbar-track { background: #0f1117; }
+        .chat-container::-webkit-scrollbar-thumb { background: #2a2a3e; border-radius: 3px; }
+
+        .message { margin-bottom: 20px; display: flex; gap: 12px; }
+        .message .avatar { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+        .message.user .avatar { background: #2563eb; }
+        .message.bot .avatar { background: linear-gradient(135deg, #e63946 0%, #f77f00 100%); }
+        .message .content { flex: 1; }
+        .message .content .name { font-size: 12px; color: #6c7293; margin-bottom: 4px; }
+        .message .content .bubble { padding: 14px 18px; border-radius: 12px; font-size: 14px; line-height: 1.7; white-space: pre-wrap; word-break: break-word; }
+        .message.user .content .bubble { background: #1e3a5f; color: #e0e0e0; }
+        .message.bot .content .bubble { background: #1a1a2e; border: 1px solid #2a2a3e; color: #e0e0e0; }
+
+        .sources { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+        .source-tag { font-size: 11px; padding: 2px 8px; border-radius: 4px; background: #2a2a3e; color: #6c7293; }
+        .intent-tag { font-size: 11px; padding: 2px 8px; border-radius: 4px; background: #1b4332; color: #4ade80; }
+
+        .welcome { text-align: center; padding: 40px 20px; }
+        .welcome .icon { font-size: 48px; margin-bottom: 16px; }
+        .welcome h2 { font-size: 22px; color: #fff; margin-bottom: 8px; }
+        .welcome p { font-size: 14px; color: #6c7293; max-width: 400px; margin: 0 auto 24px; }
+        .suggestions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; max-width: 600px; margin: 0 auto; }
+        .suggestion-card { background: #1a1a2e; border: 1px solid #2a2a3e; border-radius: 10px; padding: 14px; cursor: pointer; transition: all 0.2s; font-size: 13px; color: #a0a0b0; }
+        .suggestion-card:hover { border-color: #e63946; background: #1e1e3a; color: #fff; transform: translateY(-1px); }
+
+        .typing { display: inline-flex; gap: 4px; }
+        .typing span { width: 8px; height: 8px; background: #6c7293; border-radius: 50%; animation: typing 1.4s infinite; }
+        .typing span:nth-child(2) { animation-delay: 0.2s; }
+        .typing span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing { 0%, 60%, 100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-6px); opacity: 1; } }
+
+        .input-area { border-top: 1px solid #2a2a3e; padding: 16px 24px; background: #0f1117; }
+        .input-wrapper { max-width: 900px; margin: 0 auto; display: flex; gap: 10px; align-items: flex-end; }
+        .input-wrapper textarea { flex: 1; background: #1a1a2e; border: 1px solid #2a2a3e; border-radius: 10px; padding: 12px 16px; color: #e0e0e0; font-size: 14px; font-family: inherit; resize: none; max-height: 120px; outline: none; transition: border-color 0.2s; }
+        .input-wrapper textarea:focus { border-color: #e63946; }
+        .input-wrapper textarea::placeholder { color: #4a4a5e; }
+        .input-wrapper button { background: linear-gradient(135deg, #e63946 0%, #f77f00 100%); color: #fff; border: none; border-radius: 10px; padding: 12px 24px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+        .input-wrapper button:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3); }
+        .input-wrapper button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">🍅</div>
+        <div>
+            <h1>番茄育种知识库问答系统</h1>
+            <div class="subtitle">基于RAG的育种决策助手 · 抗病基因 · 性状遗传 · 杂交育种</div>
+        </div>
+        <div class="status">
+            <div class="dot"></div>
+            <span>知识库已加载</span>
+        </div>
+    </div>
+
+    <div class="chat-container" id="chatContainer">
+        <div class="welcome" id="welcome">
+            <div class="icon">🍅</div>
+            <h2>育种知识库问答系统</h2>
+            <p>我可以回答抗病基因、性状遗传规律、杂交育种方法、品种评价等问题，也可以查询你的育种数据</p>
+            <div class="suggestions" id="suggestions"></div>
+        </div>
+    </div>
+
+    <div class="input-area">
+        <div class="input-wrapper">
+            <textarea id="input" placeholder="输入你的问题，如：Ty1和Ty3同时携带的材料抗病性如何？" rows="1" onkeydown="handleKey(event)"></textarea>
+            <button id="sendBtn" onclick="send()">发送</button>
+        </div>
+    </div>
+
+    <script>
+        const chatContainer = document.getElementById('chatContainer');
+        const input = document.getElementById('input');
+        const sendBtn = document.getElementById('sendBtn');
+
+        input.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+
+        function handleKey(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                send();
+            }
+        }
+
+        async function loadSuggestions() {
+            const resp = await fetch('/api/suggestions');
+            const data = await resp.json();
+            const container = document.getElementById('suggestions');
+            container.innerHTML = data.suggestions.map(s =>
+                `<div class="suggestion-card" onclick="useSuggestion('${s}')">${s}</div>`
+            ).join('');
+        }
+        loadSuggestions();
+
+        function useSuggestion(text) {
+            input.value = text;
+            send();
+        }
+
+        function addMessage(role, content, sources, intent) {
+            const welcome = document.getElementById('welcome');
+            if (welcome) welcome.remove();
+
+            const msg = document.createElement('div');
+            msg.className = `message ${role}`;
+
+            let sourceHtml = '';
+            if (sources && sources.length > 0) {
+                sourceHtml = '<div class="sources">';
+                if (intent) sourceHtml += `<span class="intent-tag">${intent}</span>`;
+                sourceHtml += sources.map(s => `<span class="source-tag">📄 ${s}</span>`).join('');
+                sourceHtml += '</div>';
+            }
+
+            msg.innerHTML = `
+                <div class="avatar">${role === 'user' ? '👤' : '🍅'}</div>
+                <div class="content">
+                    <div class="name">${role === 'user' ? '你' : '育种助手'}</div>
+                    <div class="bubble">${escapeHtml(content)}</div>
+                    ${sourceHtml}
+                </div>
+            `;
+            chatContainer.appendChild(msg);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function showTyping() {
+            const welcome = document.getElementById('welcome');
+            if (welcome) welcome.remove();
+
+            const msg = document.createElement('div');
+            msg.className = 'message bot';
+            msg.id = 'typingMsg';
+            msg.innerHTML = `
+                <div class="avatar">🍅</div>
+                <div class="content">
+                    <div class="name">育种助手</div>
+                    <div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>
+                </div>
+            `;
+            chatContainer.appendChild(msg);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function removeTyping() {
+            const t = document.getElementById('typingMsg');
+            if (t) t.remove();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        async function send() {
+            const question = input.value.trim();
+            if (!question) return;
+
+            addMessage('user', question);
+            input.value = '';
+            input.style.height = 'auto';
+            sendBtn.disabled = true;
+
+            showTyping();
+
+            try {
+                const resp = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question })
+                });
+                const data = await resp.json();
+                removeTyping();
+
+                if (data.error) {
+                    addMessage('bot', '❌ ' + data.error);
+                } else {
+                    addMessage('bot', data.answer, data.sources, data.intent);
+                }
+            } catch (e) {
+                removeTyping();
+                addMessage('bot', '❌ 网络错误，请重试');
+            }
+
+            sendBtn.disabled = false;
+            input.focus();
+        }
+    </script>
+</body>
+</html>
