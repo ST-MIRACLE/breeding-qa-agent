@@ -21,4 +21,4 @@ DOCS_DIR = os.path.join(KNOWLEDGE_BASE_DIR, "docs")
 VECTOR_STORE_DIR = os.path.join(BASE_DIR, "vector_store")
 STRUCTURED_KB_PATH = os.path.join(KNOWLEDGE_BASE_DIR, "breeding_knowledge.json")
 
-BREEDING_DATA_DIR = "D:\\育种数据\\数据"
+BREEDING_DATA_DIR = os.path.join(BASE_DIR, "data")
