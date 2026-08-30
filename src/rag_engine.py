@@ -6,7 +6,7 @@ import os
 import json
 import requests
 import pandas as pd
-from config import API_KEY, CHAT_MODEL, STRUCTURED_KB_PATH, BREEDING_DATA_DIR
+from config import API_KEY, CHAT_MODEL, STRUCTURED_KB_PATH, BREEDING_DATA_DIR, VECTOR_STORE_DIR
 from embedding_manager import EmbeddingManager
 
 
@@ -19,8 +19,17 @@ class RAGEngine:
         self.llm_api_key = API_KEY
         self.chat_model = CHAT_MODEL
         self.embedding = EmbeddingManager()
+        self._ensure_index()
         self.structured_kb = self._load_structured_kb()
         self.breeding_data = self._load_breeding_data()
+
+    def _ensure_index(self):
+        """确保TF-IDF索引存在，不存在则自动构建"""
+        store_path = os.path.join(VECTOR_STORE_DIR, "tfidf_store.npz")
+        if not os.path.exists(store_path):
+            print("[初始化] 未检测到TF-IDF索引，正在构建...")
+            self.embedding.build_index()
+            print("[初始化] 索引构建完成")
 
     def _load_structured_kb(self):
         with open(STRUCTURED_KB_PATH, "r", encoding="utf-8") as f:
