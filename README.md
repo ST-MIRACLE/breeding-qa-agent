@@ -40,6 +40,7 @@ breeding-qa-agent/
 │   │   ├── 03_杂交育种方法.md
 │   │   └── 04_育种目标与评价标准.md
 │   └── breeding_knowledge.json # 结构化知识库（基因/遗传/标准）
+├── data/                      # 用户育种Excel数据（启动时自动加载）
 ├── templates/
 │   └── chat.html             # 前端聊天界面
 ├── portfolio.html             # 作品集页面
@@ -56,7 +57,10 @@ pip install pandas openpyxl requests numpy
 cp config.example.json config.json
 # 编辑 config.json 填入你的 DashScope API Key
 
-# 3. 启动系统
+# 3. 放入育种数据（可选，用于数据查询/报告生成/杂交推荐）
+# 将品质测定、性状调查等Excel文件放入 data/ 目录，系统启动时自动加载
+
+# 4. 启动系统
 python src/chat_server.py
 # 或双击 启动.bat
 ```
