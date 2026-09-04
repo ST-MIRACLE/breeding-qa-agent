@@ -3,3 +3,11 @@ __pycache__/
 *.pyc
 vector_store/
 *.npz
+
+# 私人育种数据（不上传GitHub）
+data/
+*.xlsx
+*.csv
+# 备份文件
+*.bak
+*.bak_*

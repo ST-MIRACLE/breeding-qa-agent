@@ -21,4 +21,8 @@ DOCS_DIR = os.path.join(KNOWLEDGE_BASE_DIR, "docs")
 VECTOR_STORE_DIR = os.path.join(BASE_DIR, "vector_store")
 STRUCTURED_KB_PATH = os.path.join(KNOWLEDGE_BASE_DIR, "breeding_knowledge.json")
 
+# 育种数据目录：优先使用项目内的 data/（便于开源分享，不包含个人数据）；
+# 若本地 data/ 不存在，则回退到本机个人数据目录（该目录不提交到GitHub）。
 BREEDING_DATA_DIR = os.path.join(BASE_DIR, "data")
+if not os.path.exists(BREEDING_DATA_DIR):
+    BREEDING_DATA_DIR = "D:\\育种数据\\数据"
